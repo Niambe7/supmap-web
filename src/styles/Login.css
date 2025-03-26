@@ -1,0 +1,121 @@
+/* Styles globaux */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+}
+
+/* Styles de la page de connexion */
+.login-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  padding-right: 200px;
+}
+
+/* Section à gauche */
+.left-section {
+  margin-left: 200px;
+  text-align: left;
+}
+
+.left-section h1 {
+  color: #800080;
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+.left-section .slogan {
+  color: black;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+/* Conteneur de connexion */
+.login-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 500px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.error {
+  color: red;
+  margin-bottom: 15px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 15px;
+}
+
+label {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border 0.3s;
+}
+
+input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+button {
+  background-color: #800080;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+  font-size: 16px;
+  margin-left: 15px;
+}
+
+button:hover {
+  background-color: #660066;
+}
+
+/* Liens entre le bouton de connexion et le bouton Google */
+.login-links {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd; /* Ajout d'une légère séparation */
+}
+
+.login-links a {
+  color: #800080;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+/* Bouton Google tout en bas */
+.google-login {
+  margin-top: 20px;
+}

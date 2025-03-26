@@ -1,0 +1,45 @@
+/* Faire en sorte que la carte occupe toute la page */
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Conteneur de la recherche, positionné en haut à gauche */
+.search-container {
+  position: absolute;
+  top: 20px; /* Espacement du haut */
+  left: 20px; /* Espacement de la gauche */
+  z-index: 1000; /* S'assurer que le formulaire soit devant la carte */
+  background: rgba(255, 255, 255, 0.8); /* Fond blanc semi-transparent */
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Champs de saisie de texte */
+.search-container input {
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 200px; /* Largeur des champs de saisie */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Bouton de recherche */
+.search-container button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.search-container button:hover {
+  background-color: #0056b3;
+}

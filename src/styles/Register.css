@@ -1,0 +1,100 @@
+/* Styles de base */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Conteneur principal */
+.register-page {
+  text-align: center;
+}
+
+/* Titre */
+.register-title {
+  color: #800080;
+  font-size: 40px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* Conteneur du formulaire */
+.register-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  width: 400px;
+  text-align: center;
+}
+
+/* Titres */
+h2 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Inputs */
+input {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+/* Labels */
+label {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Bouton */
+button {
+  background-color: #800080;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 90%;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover {
+  background-color: #660066;
+}
+
+/* Lien vers la connexion */
+.register-links a {
+  color: #800080;
+  text-decoration: underline;
+  font-size: 16px;
+}
+
+/* Messages d'erreur et de succès */
+.success-message {
+  color: green;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
