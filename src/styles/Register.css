@@ -75,10 +75,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-button:hover {
-  background-color: #660066;
-}
-
 /* Lien vers la connexion */
 .register-links a {
   color: #800080;

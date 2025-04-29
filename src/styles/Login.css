@@ -95,9 +95,6 @@ button {
   margin-left: 15px;
 }
 
-button:hover {
-  background-color: #660066;
-}
 
 /* Liens entre le bouton de connexion et le bouton Google */
 .login-links {

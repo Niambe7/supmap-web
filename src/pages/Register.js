@@ -5,7 +5,7 @@ import "../styles/Register.css"; // Importation du fichier CSS
 const Register = () => {
   const navigate = useNavigate(); // Pour rediriger l'utilisateur après l'inscription
   const [formData, setFormData] = useState({
-    name: "", // Correspond à "name" dans l'API
+    username: "", // Correspond à "name" dans l'API
     email: "",
     password: "",
   });
@@ -26,13 +26,16 @@ const Register = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://api.supmap-server.pp.ua/users/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 

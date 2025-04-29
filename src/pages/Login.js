@@ -24,20 +24,29 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    // Log pour vérifier les valeurs
     console.log("Email:", email, "Mot de passe:", password);
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/users/login",
+        "https://api.supmap-server.pp.ua/auth/auth/login",
         {
           email,
           password,
         }
       );
 
-      localStorage.setItem("token", response.data.token);
-      navigate("/map");
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user_id", user.id);
+      localStorage.setItem("role", user.role); // 👈 Sauvegarde du rôle
+
+      // ✅ Redirection conditionnelle selon le rôle
+      if (user.role === "admin") {
+        navigate("/trafficAnalysis");
+      } else {
+        navigate("/map");
+      }
     } catch (error) {
       console.error("Erreur de connexion", error);
       setError("Échec de connexion. Vérifie tes identifiants.");
@@ -53,8 +62,17 @@ const Login = () => {
         }
       );
 
-      localStorage.setItem("token", response.data.token);
-      navigate("/map");
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user_id", user.id);
+      localStorage.setItem("role", user.role);
+
+      if (user.role === "admin") {
+        navigate("/trafficAnalysis");
+      } else {
+        navigate("/map");
+      }
     } catch (error) {
       console.error("Erreur lors de la connexion Google", error);
       setError("Échec de connexion avec Google.");
@@ -99,13 +117,11 @@ const Login = () => {
             <button type="submit">Se connecter</button>
           </form>
 
-          {/* Liens entre le bouton de connexion et le bouton Google */}
           <div className="login-links">
             <a href="/reset-password">Mot de passe oublié ?</a>
             <a href="/register">Créer un compte</a>
           </div>
 
-          {/* Bouton Google tout en bas */}
           <div className="google-login">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
