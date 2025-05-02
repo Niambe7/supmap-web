@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Map from "./pages/Map";
 import Register from "./pages/Register";
-import TrafficAnalysis from "./pages/TrafficAnalysis";
+import TrafficAnalysis from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute"; // 👈 Import de la route admin
 import ForgotPassword from "./pages/ForgotPassword";
 
