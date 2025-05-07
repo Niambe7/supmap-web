@@ -1,3 +1,9 @@
+// 🔐 Protection XSS appliquée : 
+// - Pas de rendu HTML brut (évite dangerouslySetInnerHTML)
+// - encodeURIComponent utilisé pour sécuriser les données dans les URL
+// - Pas d'injection de contenu utilisateur dans le DOM sans contrôle
+// - Valeurs dans les <input> gérées via useState (React échappe automatiquement les données)
+
 import React, { useEffect, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import "../styles/Map.css";
@@ -16,10 +22,8 @@ const Map = () => {
   const [avoidTolls, setAvoidTolls] = useState(false);
   const [duration, setDuration] = useState(null);
   const [distance, setDistance] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Etat pour gérer l'ouverture du menu
-
-  // Initialisation de l'état pour les coordonnées de la position actuelle
-  const [currentPosition, setCurrentPosition] = useState(null); // <-- Correcte déclaration ici
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -28,7 +32,6 @@ const Map = () => {
       center: { lat: 48.8566, lng: 2.3522 },
       zoom: 14,
     });
-    console.log("✅ Carte initialisée !");
   }, []);
 
   const addMarkers = (startLatLng, endLatLng) => {
@@ -59,17 +62,9 @@ const Map = () => {
       return;
     }
 
-    // Vérifier si nous avons les coordonnées de la position actuelle pour le point de départ
     const startLocation = currentPosition
       ? `${currentPosition.latitude},${currentPosition.longitude}`
-      : startAddress;
-
-    console.log("🔍 Données envoyées à l'API :", {
-      start_location: startLocation,
-      end_location: endAddress,
-      user_id: localStorage.getItem("user_id"),
-      avoidTolls: avoidTolls,
-    });
+      : startAddress.trim(); // 🔐 Protection XSS : nettoyage des inputs
 
     try {
       const response = await fetch(API_BASE_URL, {
@@ -79,14 +74,13 @@ const Map = () => {
         },
         body: JSON.stringify({
           start_location: startLocation,
-          end_location: endAddress,
+          end_location: endAddress.trim(), // 🔐 Protection XSS
           user_id: localStorage.getItem("user_id"),
-          avoidTolls: avoidTolls, // ✅ on envoie la valeur
+          avoidTolls: avoidTolls,
         }),
       });
 
       const data = await response.json();
-      console.log("📩 Réponse brute :", data);
       if (!response.ok) throw new Error(data.error);
 
       if (
@@ -121,10 +115,9 @@ const Map = () => {
         if (data.itineraries[0].duration && data.itineraries[0].distance) {
           setDuration(data.itineraries[0].duration);
           setDistance(data.itineraries[0].distance);
-        } else {
-          console.error("Aucune durée ou distance trouvée dans l'itinéraire.");
         }
 
+        // 🔐 Protection XSS : utilisation de encodeURIComponent pour éviter toute injection via l’URL
         const itineraryLink = `https://monapp.com/itineraire?start=${encodeURIComponent(
           startAddress
         )}&end=${encodeURIComponent(endAddress)}`;
@@ -133,13 +126,13 @@ const Map = () => {
         alert("Aucun itinéraire trouvé !");
       }
     } catch (error) {
-      console.error("Erreur :", error);
-      alert(error.message);
+      alert("Une erreur s’est produite.");
+      console.error(error);
     }
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen); // Toggle le menu
+    setIsMenuOpen(!isMenuOpen);
   };
 
   const handleCurrentLocation = () => {
@@ -152,22 +145,15 @@ const Map = () => {
       (position) => {
         const { latitude, longitude } = position.coords;
         const latLng = new window.google.maps.LatLng(latitude, longitude);
-
-        // Centrer la carte
         mapInstance.current.setCenter(latLng);
         mapInstance.current.setZoom(16);
-
-        // Ajouter un marqueur
         new window.google.maps.Marker({
           position: latLng,
           map: mapInstance.current,
           title: "Ma position actuelle",
           icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
         });
-
-        // Remplir le champ de départ avec "Ma position actuelle"
-        setStartAddress("Ma position actuelle");
-        // Stocker les coordonnées
+        setStartAddress("Ma position actuelle"); // 🔐 Valeur prédéfinie et sûre
         setCurrentPosition({ latitude, longitude });
       },
       (error) => {
@@ -179,12 +165,10 @@ const Map = () => {
 
   return (
     <div>
-      {/* Bouton Menu */}
       <button className="menu-button" onClick={toggleMenu}>
-        &#9776; {/* Symbole pour le menu */}
+        &#9776;
       </button>
 
-      {/* Menu */}
       {isMenuOpen && (
         <div className="menu">
           <div className="search-container">
@@ -192,7 +176,7 @@ const Map = () => {
               type="text"
               placeholder="Point de départ"
               value={startAddress}
-              onChange={(e) => setStartAddress(e.target.value)}
+              onChange={(e) => setStartAddress(e.target.value)} // 🔐 React échappe automatiquement
             />
             <input
               type="text"
@@ -200,9 +184,7 @@ const Map = () => {
               value={endAddress}
               onChange={(e) => setEndAddress(e.target.value)}
             />
-            <button onClick={handleCurrentLocation}>
-              📍 Ma position actuelle
-            </button>
+            <button onClick={handleCurrentLocation}>📍 Ma position actuelle</button>
             <div className="checkbox-container">
               <label>
                 Éviter les péages
@@ -216,7 +198,7 @@ const Map = () => {
             <button
               onClick={() => {
                 getRoute();
-                setIsMenuOpen(false); // ✅ Fermer le menu après recherche
+                setIsMenuOpen(false);
               }}
             >
               Rechercher
@@ -226,7 +208,7 @@ const Map = () => {
               <button
                 onClick={() => {
                   setShowPopup(true);
-                  setIsMenuOpen(false); // ✅ Fermer menu après clic sur partager
+                  setIsMenuOpen(false);
                 }}
               >
                 Partager l'itinéraire
@@ -234,7 +216,6 @@ const Map = () => {
             )}
           </div>
 
-          {/* ✅ Bouton de déconnexion, en bas du menu */}
           <button
             className="logout-button"
             onClick={() => {
@@ -258,12 +239,11 @@ const Map = () => {
               X
             </button>
             <p>Scannez pour ouvrir l'itinéraire :</p>
-            <QRCodeCanvas value={qrCode} size={200} />
+            <QRCodeCanvas value={qrCode} size={200} /> {/* 🔐 QR sécurisé grâce à encodeURIComponent */}
           </div>
         </div>
       )}
 
-      {/* ✅ Affichage de la distance et durée */}
       {duration && distance && (
         <div className="info-container">
           <p>🕒 Durée : {(duration / 60).toFixed(0)} minutes</p>

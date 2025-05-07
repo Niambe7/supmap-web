@@ -1,24 +1,36 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Pour rediriger après l'inscription
-import "../styles/Register.css"; // Importation du fichier CSS
+import { useNavigate } from "react-router-dom";
+import "../styles/Register.css";
+
+// 🛡️ Étape 1 : Fonction pour neutraliser les balises potentiellement dangereuses (Protection XSS)
+const sanitizeInput = (input) => {
+  const temp = document.createElement("div");
+  temp.textContent = input; // Échappe tout contenu HTML/JS
+  return temp.innerHTML;
+};
 
 const Register = () => {
-  const navigate = useNavigate(); // Pour rediriger l'utilisateur après l'inscription
+  const navigate = useNavigate();
+
+  // 📝 Étape 2 : Déclaration de l'état pour stocker les champs du formulaire
   const [formData, setFormData] = useState({
-    username: "", // Correspond à "name" dans l'API
+    name: "",
     email: "",
     password: "",
   });
 
-  const [loading, setLoading] = useState(false); // État pour le bouton de chargement
-  const [message, setMessage] = useState(""); // Message de succès ou erreur
-  const [error, setError] = useState(""); // Message d'erreur
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
+  // 🛡️ Étape 3 : Nettoyer chaque saisie utilisateur avant de la stocker (Protection XSS)
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const sanitizedValue = sanitizeInput(value); // <-- protection ici
+    setFormData({ ...formData, [name]: sanitizedValue });
   };
 
+  // 🚀 Étape 4 : Envoi des données vers l'API après soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,25 +38,21 @@ const Register = () => {
     setError("");
 
     try {
-      const response = await fetch(
-        "https://api.supmap-server.pp.ua/users/users",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("https://api.supmap-server.pp.ua/users/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // Les données ont déjà été nettoyées
+      });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Une erreur est survenue.");
-      }
+      // ✅ Étape 5 : Vérification de la réponse de l'API
+      if (!response.ok) throw new Error(data.error || "Une erreur est survenue.");
 
       setMessage("Inscription réussie ! 🎉 Redirection...");
-      setTimeout(() => navigate("/"), 2000); // Redirige après 2 secondes
+      setTimeout(() => navigate("/"), 2000);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -52,11 +60,13 @@ const Register = () => {
     }
   };
 
+  // 🎨 Étape 6 : Affichage du formulaire sécurisé côté utilisateur
   return (
     <div className="register-page">
       <h1 className="register-title">SupMap</h1>
       <div className="register-container">
         <h2>Inscription</h2>
+
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}
 
