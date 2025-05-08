@@ -1,237 +1,164 @@
-/* Carte plein écran */
+/* Carte Google Maps */
 .map-container {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 60px;          /* décalage à droite pour laisser place à la sidebar */
+  width: calc(100% - 60px); /* ✅ largeur restante après la sidebar */
+  height: 100vh;
+  z-index: 100;
+  display: block;
 }
-
-.search-container button.location-button {
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  height: 20px;
-  width: 100%; /* ✅ pour qu'il prenne toute la largeur comme les champs */
-  text-align: left; /* optionnel pour l'aligner comme un input */
-}
-
-.search-container button.location-button:hover {
-  background-color: #f0f0f0;
-}
-
-
-/* ✅ Bouton Menu ☰ */
-.menu-button {
+/* Sidebar verticale */
+.sidebar {
   position: absolute;
-  top: 30px;
-  left: 0;               /* Collé complètement à gauche */
-  z-index: 1300;
-  font-size: 30px;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 60px;
+  background-color: #a96fea;
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+/* Bouton hamburger */
+.menu-button {
   background: none;
   border: none;
-  outline: none;
+  margin-left: 0;
+  font-size: 28px;
+  color: white;
   cursor: pointer;
-  color: black;
-}
-
-
-/* Supprime le style de focus par défaut */
-.menu-button:focus {
   outline: none;
-  box-shadow: none;
 }
 
-/* ✅ Sidebar Menu */
+/* Menu latéral */
 .menu {
   position: absolute;
-  top: 70px;
-  left: 40px;
-  height: 80%;
-  width: 280px;
-  background: white;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  top: 0;
+  left: 60px; /* décale le menu après la sidebar */
+  background-color: #fff;
+  z-index: 1390;
+  width: 300px;
   padding: 20px;
-  z-index: 1200;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  border-radius: 8px; /* optionnel pour un look plus doux */
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Conteneur de recherche dans le menu */
-.search-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Inputs */
+/* Inputs et boutons */
 .search-container input[type="text"] {
-  padding: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 14px;
 }
 
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  gap: 12px;            /* 🔽 Réduit l'espace entre la case et le texte */
-  margin-left: 2px;    /* 🔽 Ajuste pour aligner avec les champs au-dessus */
-  margin-bottom: 10px; /* Espacement vers le bas, optionnel */
-}
-
-.checkbox-container input[type="checkbox"] {
-  margin-left: 24px;  /* ⬅️ Espace entre le texte et la case */
-}
-
-.checkbox-container label {
-  margin: 0;
-  white-space: nowrap; /* ✅ empêche le retour à la ligne du label */
-}
-
-
-/* Bouton rechercher */
 .search-container button {
+  width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  margin-bottom: 10px;
+  background-color: #a96fea;
   color: white;
   border: none;
   border-radius: 4px;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
 .search-container button:hover {
-  background-color: #0056b3;
+  background-color: #914dd8;
 }
 
-/* ✅ Conteneur pour le bouton partager */
-.share-container {
-  margin-top: 10px;
+/* Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
-.share-container button {
+/* Bouton de déconnexion */
+.logout-button1 {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: calc(100% - 40px);
   padding: 10px;
-  background-color: #28a745;
+  background-color: #a96fea;
   color: white;
   border: none;
   border-radius: 4px;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 14px;
-  width: 100%;
-}
-
-.share-container button:hover {
-  background-color: #218838;
-}
-
-/* ✅ Bouton Déconnexion */
-.logout-button {
-  margin-top: auto;
-  background-color: #800080;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 10px;
-  border-radius: 4px;
-  width: 90%;
 }
 
 .logout-button:hover {
-  background-color: #890689;
+  background-color: #914dd8;
 }
 
-/* Popup QR Code */
+/* Informations itinéraire */
+.info-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 1300;
+  font-size: 14px;
+}
+
+/* Popup QR code */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 1500;
 }
 
 .popup-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
   text-align: center;
   position: relative;
-}
-
-.popup-content p {
-  font-size: 16px;
-  margin-bottom: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .close-button {
   position: absolute;
   top: 10px;
-  right: 10px;
-  background: blue;
-  color: white;
+  right: 15px;
+  font-size: 18px;
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 16px;
   cursor: pointer;
 }
 
-.close-button:hover {
-  background: darkblue;
-}
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .menu {
+    width: 90%;
+    left: 60px;
+  }
 
-/* Infos itinéraire (durée et distance) */
-.info-container {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 15px;
-  color: #333;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  .info-container {
+    bottom: 10px;
+    right: 10px;
+    font-size: 13px;
+  }
 }
-
-.info-container p {
-  margin: 4px 0;
-}
-
-.itinerary-list {
-  position: absolute;
-  top: 80px;
-  left: 10px;
-  z-index: 10;
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.itinerary-item {
-  cursor: pointer;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.itinerary-item:hover {
-  background-color: #f1f1f1;
-}
-

@@ -252,12 +252,12 @@ const RouteMap = () => {
   };
 
   return (
-    <div>
+    <div className="sidebar">
       <button
         className="menu-button"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
-        &#9776;
+        ☰
       </button>
 
       {isMenuOpen && (
