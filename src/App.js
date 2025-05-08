@@ -1,14 +1,35 @@
 // App.js
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Map from "./pages/Map";
 import Register from "./pages/Register";
-import TrafficAnalysis from "./pages/TrafficAnalysis";
-import AdminRoute from "./components/AdminRoute"; // 👈 Import de la route admin
+import TrafficAnalysis from "./pages/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 
+// 👉 Import de la fonction utilitaire
+import { loadGoogleMaps } from "./utils/loadGoogleMaps";
+
 function App() {
+  useEffect(() => {
+    const preloadGoogleMaps = async () => {
+      try {
+        const google = await loadGoogleMaps(
+          process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+        );
+        console.log("✅ Google Maps préchargé :", google);
+      } catch (error) {
+        console.error(
+          "❌ Erreur lors du préchargement de Google Maps :",
+          error
+        );
+      }
+    };
+
+    preloadGoogleMaps();
+  }, []);
+
   return (
     <div>
       <Routes>
