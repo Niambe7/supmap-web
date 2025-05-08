@@ -25,6 +25,7 @@ function AdminDashboard() {
   const [incidentsPerDay, setIncidentsPerDay] = useState([]);
   const [searchZone, setSearchZone] = useState("");
   const [radius, setRadius] = useState(500);
+  const [location, setLocation] = useState(null);
   const [congestionData, setCongestionData] = useState([]);
   const [currentTab, setCurrentTab] = useState("congestion");
 
@@ -111,6 +112,8 @@ function AdminDashboard() {
       if (!geoData.length) return alert("Zone introuvable.");
 
       const { lat, lon } = geoData[0];
+      setLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+
       const res = await fetch(
         "https://api.supmap-server.pp.ua/statistics/statistics/congestion-periods",
         {
@@ -166,6 +169,7 @@ function AdminDashboard() {
             setRadius={setRadius}
             handleSearch={handleSearch}
             congestionData={congestionData}
+            location={location}
           />
         );
       case "day":
@@ -197,7 +201,7 @@ function AdminDashboard() {
       <button className="logout-button" onClick={handleLogout}>
         Déconnexion
       </button>
-      {/* Onglets */}
+
       <div className="tabs">
         {tabs.map((tab) => (
           <button
@@ -210,7 +214,6 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Contenu avec animation */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentTab}

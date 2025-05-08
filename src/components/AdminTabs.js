@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,23 +9,22 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { loadGoogleMaps } from "../utils/loadGoogleMaps";
 
-// Définir la couleur en fonction du niveau de congestion
 const getCongestionLevel = (count) => {
-  if (count >= 10) return "very high";
+  if (count >= 10) return "very_high";
   if (count >= 5) return "high";
   if (count >= 2) return "moderate";
   return "low";
 };
 
 const levelColors = {
-  low: "#4ade80", // vert
-  moderate: "#facc15", // jaune
-  high: "#f97316", // orange
-  very_high: "#ef4444", // rouge
+  low: "#4ade80",
+  moderate: "#facc15",
+  high: "#f97316",
+  very_high: "#ef4444",
 };
 
-// Génère 24 heures avec count = 0 par défaut
 const generateEmptyHours = () => {
   const hours = [];
   for (let i = 0; i < 24; i++) {
@@ -42,8 +41,79 @@ export function CongestionPeriods({
   setRadius,
   handleSearch,
   congestionData,
+  location,
 }) {
-  // Fusionner les données retournées avec la base vide
+  const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const [isGoogleMapsReady, setIsGoogleMapsReady] = useState(false); // Ajout de l'état pour l'API
+
+  console.log("Clé API:", process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+
+  useEffect(() => {
+    const initMap = async () => {
+      try {
+        const google = await loadGoogleMaps(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+
+        if (!window.google || !google.maps || !google.maps.visualization) {
+          console.error("L'API Google Maps n'a pas pu être chargée correctement.");
+          alert("L'API Google Maps n'a pas pu être chargée correctement.");
+          return;
+        }
+
+        console.log("Google Maps chargé avec succès:", google);
+
+        // Une fois que l'API Google Maps est chargée, on met à jour l'état pour signaler que la carte peut être affichée
+        setIsGoogleMapsReady(true);
+
+        // Initialiser la carte avec un délai pour s'assurer que l'API est complètement prête
+        if (location && google && mapRef.current) {
+          if (!mapInstance.current) {
+            mapInstance.current = new google.maps.Map(mapRef.current, {
+              center: location,
+              zoom: 15,
+              zoomControl: true,
+              mapTypeControl: false,
+              streetViewControl: false,
+              fullscreenControl: false,
+            });
+          }
+          mapInstance.current.setCenter(location);
+
+          // Ajouter un cercle à la carte
+          new google.maps.Circle({
+            center: location,
+            radius: parseInt(radius),
+            map: mapInstance.current,
+            fillColor: "#FF0000",
+            fillOpacity: 0.2,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.8,
+            strokeWeight: 1,
+          });
+
+          // Ajouter la Heatmap si les données existent
+          if (google.maps.visualization && congestionData.length > 0) {
+            const heatmapData = congestionData
+              .filter((item) => item.lat && item.lng)
+              .map(
+                (item) =>
+                  new google.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng))
+              );
+
+            new google.maps.visualization.HeatmapLayer({
+              data: heatmapData,
+              map: mapInstance.current,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Erreur lors du chargement de Google Maps:", err);
+      }
+    };
+
+    initMap();
+  }, [location, radius, congestionData]);
+
   const hourMap = {};
   congestionData.forEach((item) => {
     const hour = new Date(item.period_start).getHours();
@@ -59,6 +129,10 @@ export function CongestionPeriods({
       level: getCongestionLevel(count),
     };
   });
+
+  if (!isGoogleMapsReady) {
+    return <div>Chargement de la carte...</div>;
+  }
 
   return (
     <section className="section">
@@ -80,7 +154,12 @@ export function CongestionPeriods({
         <button onClick={handleSearch}>Rechercher</button>
       </div>
 
-      {/* Diagramme à barres verticales */}
+      {location && (
+        <div style={{ height: "300px", marginTop: "2rem" }}>
+          <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
+        </div>
+      )}
+
       <div style={{ marginTop: "2rem", width: "100%", height: 400 }}>
         <ResponsiveContainer>
           <BarChart
@@ -96,8 +175,8 @@ export function CongestionPeriods({
                 position: "insideLeft",
               }}
               type="number"
-              domain={[0, 12]} // Pour couvrir tous les niveaux
-              ticks={[1, 3, 7, 11]} // Points de référence
+              domain={[0, 12]}
+              ticks={[1, 3, 7, 11]}
               tickFormatter={(value) => {
                 if (value <= 1) return "Low";
                 if (value <= 4) return "Moderate";
@@ -105,7 +184,6 @@ export function CongestionPeriods({
                 return "Very High";
               }}
             />
-
             <Tooltip />
             <Bar dataKey="count">
               {chartData.map((entry, index) => (
@@ -119,7 +197,7 @@ export function CongestionPeriods({
   );
 }
 
-// Composant IncidentsPerDay
+
 export function IncidentsPerDay({ incidentsPerDay }) {
   return (
     <section className="section">
@@ -155,7 +233,6 @@ export function IncidentsPerDay({ incidentsPerDay }) {
   );
 }
 
-// Composant PendingIncidents
 export function PendingIncidents({ pendingIncidents, updateIncidentStatus }) {
   return (
     <section className="section">
@@ -199,7 +276,6 @@ export function PendingIncidents({ pendingIncidents, updateIncidentStatus }) {
   );
 }
 
-// Composant ActiveIncidents
 export function ActiveIncidents({ activeIncidents, updateIncidentStatus }) {
   return (
     <section className="section">
@@ -241,7 +317,6 @@ export function ActiveIncidents({ activeIncidents, updateIncidentStatus }) {
   );
 }
 
-// Composant ResolvedIncidents
 export function ResolvedIncidents({ resolvedIncidents }) {
   return (
     <section className="section">
