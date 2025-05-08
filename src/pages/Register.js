@@ -38,18 +38,22 @@ const Register = () => {
     setError("");
 
     try {
-      const response = await fetch("https://api.supmap-server.pp.ua/users/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), // Les données ont déjà été nettoyées
-      });
+      const response = await fetch(
+        "https://api.supmap-server.pp.ua/users/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData), // Les données ont déjà été nettoyées
+        }
+      );
 
       const data = await response.json();
 
       // ✅ Étape 5 : Vérification de la réponse de l'API
-      if (!response.ok) throw new Error(data.error || "Une erreur est survenue.");
+      if (!response.ok)
+        throw new Error(data.error || "Une erreur est survenue.");
 
       setMessage("Inscription réussie ! 🎉 Redirection...");
       setTimeout(() => navigate("/"), 2000);
@@ -73,6 +77,7 @@ const Register = () => {
         <form onSubmit={handleSubmit}>
           <label htmlFor="name">Nom complet</label>
           <input
+            className="input-register"
             type="text"
             name="name"
             placeholder="Votre nom complet"
@@ -83,6 +88,7 @@ const Register = () => {
 
           <label htmlFor="email">Adresse email</label>
           <input
+            className="input-register"
             type="email"
             name="email"
             placeholder="Adresse email"
@@ -93,6 +99,7 @@ const Register = () => {
 
           <label htmlFor="password">Mot de passe</label>
           <input
+            className="input-register"
             type="password"
             name="password"
             placeholder="Mot de passe"

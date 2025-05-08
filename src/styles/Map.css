@@ -2,8 +2,8 @@
 .map-container {
   position: absolute;
   top: 0;
-  left: 60px;          /* décalage à droite pour laisser place à la sidebar */
-  width: calc(100% - 60px); /* ✅ largeur restante après la sidebar */
+  left: 60px;
+  width: 100%;
   height: 100vh;
   z-index: 100;
   display: block;
@@ -43,8 +43,7 @@
   z-index: 1390;
   width: 300px;
   padding: 20px;
-  height: 100vh;
-  overflow-y: auto;
+  height: 94%;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
 }
 

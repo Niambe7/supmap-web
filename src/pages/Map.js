@@ -1,4 +1,4 @@
-// 🔐 Protection XSS appliquée : 
+// 🔐 Protection XSS appliquée :
 // - Pas de rendu HTML brut (évite dangerouslySetInnerHTML)
 // - encodeURIComponent utilisé pour sécuriser les données dans les URL
 // - Pas d'injection de contenu utilisateur dans le DOM sans contrôle
@@ -252,104 +252,105 @@ const RouteMap = () => {
   };
 
   return (
-    <div className="sidebar">
-      <button
-        className="menu-button"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-      >
-        ☰
-      </button>
+    <div>
+      <div className="sidebar">
+        <button
+          className="menu-button"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          ☰
+        </button>
 
-      {isMenuOpen && (
-        <div className="menu">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Point de départ"
-              value={startAddress}
-              onChange={(e) => setStartAddress(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Point d'arrivée"
-              value={endAddress}
-              onChange={(e) => setEndAddress(e.target.value)}
-            />
-            <button onClick={handleCurrentLocation}>
-              📍 Ma position actuelle
-            </button>
-            <label className="checkbox-container">
-              Éviter les péages
+        {isMenuOpen && (
+          <div className="menu">
+            <div className="search-container">
               <input
-                type="checkbox"
-                checked={avoidTolls}
-                onChange={() => setAvoidTolls(!avoidTolls)}
+                type="text"
+                placeholder="Point de départ"
+                value={startAddress}
+                onChange={(e) => setStartAddress(e.target.value)}
               />
-            </label>
-            <button onClick={searchItineraries} disabled={loading}>
-              {loading ? "Chargement..." : "Rechercher"}
-            </button>
-
-            {itineraries.length > 0 && (
-              <div className="itinerary-list">
-                {itineraries.map((itinerary, index) => (
-                  <div
-                    key={index}
-                    className="itinerary-item"
-                    onClick={() => loadItinerary(itinerary)}
-                  >
-                    <strong>Itinéraire {index + 1}</strong>
-                    <p>🕒 {Math.round(itinerary.duration / 60)} min</p>
-                    <p>📏 {(itinerary.distance / 1000).toFixed(2)} km</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {duration && distance && (
-              <div className="info-container">
-                <p>🕒 Durée : {(duration / 60).toFixed(0)} minutes</p>
-                <p>📏 Distance : {(distance / 1000).toFixed(2)} km</p>
-              </div>
-            )}
-
-            {itineraryId && (
-              <button onClick={() => fetchQrCodeFromApi(itineraryId)}>
-                Partager l'itinéraire
+              <input
+                type="text"
+                placeholder="Point d'arrivée"
+                value={endAddress}
+                onChange={(e) => setEndAddress(e.target.value)}
+              />
+              <button onClick={handleCurrentLocation}>
+                📍 Ma position actuelle
               </button>
-            )}
-          </div>
+              <label className="checkbox-container">
+                Éviter les péages
+                <input
+                  type="checkbox"
+                  checked={avoidTolls}
+                  onChange={() => setAvoidTolls(!avoidTolls)}
+                />
+              </label>
+              <button onClick={searchItineraries} disabled={loading}>
+                {loading ? "Chargement..." : "Rechercher"}
+              </button>
 
-          <button
-            className="logout-button"
-            onClick={() => {
-              localStorage.removeItem("token");
-              localStorage.removeItem("user_id");
-              window.location.href = "/";
-            }}
-          >
-            Déconnexion
-          </button>
-        </div>
-      )}
+              {itineraries.length > 0 && (
+                <div className="itinerary-list">
+                  {itineraries.map((itinerary, index) => (
+                    <div
+                      key={index}
+                      className="itinerary-item"
+                      onClick={() => loadItinerary(itinerary)}
+                    >
+                      <strong>Itinéraire {index + 1}</strong>
+                      <p>🕒 {Math.round(itinerary.duration / 60)} min</p>
+                      <p>📏 {(itinerary.distance / 1000).toFixed(2)} km</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
+              {duration && distance && (
+                <div className="info-container">
+                  <p>🕒 Durée : {(duration / 60).toFixed(0)} minutes</p>
+                  <p>📏 Distance : {(distance / 1000).toFixed(2)} km</p>
+                </div>
+              )}
+
+              {itineraryId && (
+                <button onClick={() => fetchQrCodeFromApi(itineraryId)}>
+                  Partager l'itinéraire
+                </button>
+              )}
+            </div>
+
             <button
-              className="close-button"
-              onClick={() => setShowPopup(false)}
+              className="logout-button1"
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user_id");
+                window.location.href = "/";
+              }}
             >
-              X
+              Déconnexion
             </button>
-            <p>Scannez pour obtenir l'ID de l'itinéraire :</p>
-            {qrImageBlobUrl && (
-              <img src={qrImageBlobUrl} alt="QR Code Itinéraire" />
-            )}
           </div>
-        </div>
-      )}
+        )}
 
+        {showPopup && (
+          <div className="popup-overlay">
+            <div className="popup-content">
+              <button
+                className="close-button"
+                onClick={() => setShowPopup(false)}
+              >
+                X
+              </button>
+              <p>Scannez pour obtenir l'ID de l'itinéraire :</p>
+              {qrImageBlobUrl && (
+                <img src={qrImageBlobUrl} alt="QR Code Itinéraire" />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
       <div ref={mapRef} className="map-container"></div>
     </div>
   );
