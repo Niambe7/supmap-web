@@ -14,9 +14,10 @@ const Register = () => {
 
   // 📝 Étape 2 : Déclaration de l'état pour stocker les champs du formulaire
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
+
   });
 
   const [loading, setLoading] = useState(false);
@@ -79,9 +80,9 @@ const Register = () => {
           <input
             className="input-register"
             type="text"
-            name="name"
+            name="username"
             placeholder="Votre nom complet"
-            value={formData.name}
+            value={formData.username}
             onChange={handleChange}
             required
           />
