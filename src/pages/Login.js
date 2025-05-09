@@ -29,7 +29,7 @@ const Login = () => {
       const response = await axios.post(
         "https://api.supmap-server.pp.ua/auth/auth/login",
         {
-          email: email.trim(), // 🔐 Protection XSS : nettoyage de l’email (évite caractères invisibles ou injections)
+          email: email.trim(),
           password,
         }
       );
@@ -47,18 +47,18 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Erreur de connexion", error);
-
-      // 🔐 Protection XSS : message d’erreur codé en dur, non injecté depuis la réponse
       setError("Échec de connexion. Vérifie tes identifiants.");
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
+      const idToken = credentialResponse.credential;
+
       const response = await axios.post(
-        "http://localhost:3000/api/users/auth/google",
+        "https://api.supmap-server.pp.ua/oauth/auth/google/token",
         {
-          token: credentialResponse.credential,
+          idToken,
         }
       );
 
@@ -75,18 +75,16 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Erreur lors de la connexion Google", error);
-      // 🔐 Protection XSS : message statique, sûr
       setError("Échec de connexion avec Google.");
     }
   };
 
   const handleGoogleFailure = () => {
-    // 🔐 Protection XSS : message en dur
     setError("Échec de l'authentification Google.");
   };
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="login-page">
         <div className="left-section">
           <h1>SupMap</h1>
@@ -98,7 +96,6 @@ const Login = () => {
         <div className="login-container">
           <h2>Connexion</h2>
 
-          {/* 🔐 Protection XSS : affichage sécurisé sans innerHTML */}
           {error && <p className="error">{error}</p>}
 
           <form onSubmit={handleLogin}>
