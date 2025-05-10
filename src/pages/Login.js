@@ -3,18 +3,30 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import "../styles/Login.css";
+import {
+  Box,
+  Button,
+  CssBaseline,
+  Divider,
+  Link,
+  TextField,
+  Typography,
+  Avatar,
+  useTheme,
+  Paper,
+} from "@mui/material";
+import logo from "../assets/logo.png";
+import ThemeToggleButton from "../components/ThemeToggleButton";
 
 const Login = () => {
+  const theme = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-
+    const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
       localStorage.setItem("token", token);
       navigate("/map");
@@ -26,27 +38,16 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post(
+      const { data } = await axios.post(
         "https://api.supmap-server.pp.ua/auth/auth/login",
-        {
-          email: email.trim(),
-          password,
-        }
+        { email: email.trim(), password }
       );
-
-      const { token, user } = response.data;
-
+      const { token, user } = data;
       localStorage.setItem("token", token);
       localStorage.setItem("user_id", user.id);
       localStorage.setItem("role", user.role);
-
-      if (user.role === "admin") {
-        navigate("/trafficAnalysis");
-      } else {
-        navigate("/map");
-      }
-    } catch (error) {
-      console.error("Erreur de connexion", error);
+      navigate(user.role === "admin" ? "/trafficAnalysis" : "/map");
+    } catch {
       setError("Échec de connexion. Vérifie tes identifiants.");
     }
   };
@@ -54,87 +55,140 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const idToken = credentialResponse.credential;
-
-      const response = await axios.post(
+      const { data } = await axios.post(
         "https://api.supmap-server.pp.ua/oauth/auth/google/token",
-        {
-          idToken,
-        }
+        { idToken }
       );
-
-      const { token, user } = response.data;
-
+      const { token, user } = data;
       localStorage.setItem("token", token);
       localStorage.setItem("user_id", user.id);
+      localStorage.setItem("username", user.username); // Stockage du nom d'utilisateur
+      localStorage.setItem("email", user.email); // Stockage de l'email
       localStorage.setItem("role", user.role);
-
-      if (user.role === "admin") {
-        navigate("/trafficAnalysis");
-      } else {
-        navigate("/map");
-      }
-    } catch (error) {
-      console.error("Erreur lors de la connexion Google", error);
+      navigate(user.role === "admin" ? "/trafficAnalysis" : "/map");
+    } catch {
       setError("Échec de connexion avec Google.");
     }
   };
 
-  const handleGoogleFailure = () => {
-    setError("Échec de l'authentification Google.");
-  };
-
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-      <div className="login-page">
-        <div className="left-section">
-          <h1>SupMap</h1>
-          <p className="slogan">
-            Avec SupMap, trouvez votre chemin facilement grâce aux itinéraires
-            proposés
-          </p>
-        </div>
-        <div className="login-container">
-          <h2>Connexion</h2>
+    <>
+      <CssBaseline />
+      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          <Paper
+            elevation={3}
+            sx={{
+              p: 5,
+              borderRadius: 4,
+              width: "100%",
+              maxWidth: 400,
+              textAlign: "center",
+              position: "relative",
+            }}
+          >
+            <Box position="absolute" top={16} right={16}>
+              <ThemeToggleButton />
+            </Box>
 
-          {error && <p className="error">{error}</p>}
-
-          <form onSubmit={handleLogin}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              inputMode="email"
+            <Avatar
+              src={logo}
+              alt="SupMap Logo"
+              sx={{
+                width: 72,
+                height: 72,
+                mx: "auto",
+                mb: 1.5,
+                backgroundColor: "#fff",
+                border: "1px solid #ccc",
+              }}
             />
-            <label htmlFor="password">Mot de passe</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-            <button type="submit">Se connecter</button>
-          </form>
+            <Typography variant="h5" fontWeight="600" gutterBottom>
+              Bienvenue sur SupMap
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Connecte-toi pour accéder à ta carte.
+            </Typography>
 
-          <div className="login-links">
-            <a href="/reset-password">Mot de passe oublié ?</a>
-            <a href="/register">Créer un compte</a>
-          </div>
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
 
-          <div className="google-login">
+            <Box component="form" onSubmit={handleLogin} noValidate>
+              <TextField
+                label="Email"
+                type="email"
+                fullWidth
+                required
+                margin="normal"
+                size="small"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                label="Mot de passe"
+                type="password"
+                fullWidth
+                required
+                margin="normal"
+                size="small"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{
+                  mt: 2,
+                  py: 1.4,
+                  fontWeight: "bold",
+                  borderRadius: 2,
+                  backgroundColor: "#a259ff",
+                  "&:hover": { backgroundColor: "#923dff" },
+                }}
+              >
+                Se connecter
+              </Button>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mt: 1.5,
+                fontSize: 13,
+              }}
+            >
+              <Link href="/reset-password" underline="hover">
+                Mot de passe oublié ?
+              </Link>
+              <Link href="/register" underline="hover">
+                Créer un compte
+              </Link>
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={handleGoogleFailure}
+              onError={() => setError("Échec de l'authentification Google.")}
+              width="100%"
             />
-          </div>
-        </div>
-      </div>
-    </GoogleOAuthProvider>
+          </Paper>
+        </Box>
+      </GoogleOAuthProvider>
+    </>
   );
 };
 

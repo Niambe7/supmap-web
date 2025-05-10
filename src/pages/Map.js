@@ -1,16 +1,26 @@
-// 🔐 Protection XSS appliquée :
-// - Pas de rendu HTML brut (évite dangerouslySetInnerHTML)
-// - encodeURIComponent utilisé pour sécuriser les données dans les URL
-// - Pas d'injection de contenu utilisateur dans le DOM sans contrôle
-// - Valeurs dans les <input> gérées via useState (React échappe automatiquement les données)
-
 import React, { useEffect, useRef, useState } from "react";
-import "../styles/Map.css";
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Drawer,
+  FormControlLabel,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close"; // Import de la croix
 import { loadGoogleMaps } from "../utils/loadGoogleMaps";
 
 const RouteMap = () => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+
   const [startAddress, setStartAddress] = useState("");
   const [endAddress, setEndAddress] = useState("");
   const [routePolyline, setRoutePolyline] = useState(null);
@@ -23,45 +33,36 @@ const RouteMap = () => {
   const [qrImageBlobUrl, setQrImageBlobUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [itineraryId, setItineraryId] = useState(null);
-
-  // Initialisation de l'état pour les coordonnées de la position actuelle
-  const [currentPosition, setCurrentPosition] = useState(null); // <-- Correcte déclaration ici
+  const [currentPosition, setCurrentPosition] = useState(null);
 
   useEffect(() => {
     const initMap = async () => {
       try {
-        console.log("clé google:", process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
         const google = await loadGoogleMaps(
           process.env.REACT_APP_GOOGLE_MAPS_API_KEY
         );
-        console.log("Google Maps chargé avec succès :", google);
-
         if (!mapRef.current || mapInstance.current) return;
-
         mapInstance.current = new google.maps.Map(mapRef.current, {
-          center: { lat: 48.8566, lng: 2.3522 }, // Coordonnées par défaut
+          center: { lat: 48.8566, lng: 2.3522 },
           zoom: 14,
         });
       } catch (err) {
-        console.error("Erreur lors du chargement de Google Maps :", err);
-        alert("Google Maps n'a pas pu être chargé.");
+        alert("Erreur de chargement de Google Maps");
       }
     };
-
     initMap();
   }, []);
 
   const addMarkers = (startLatLng, endLatLng) => {
-    const isCurrentLocation =
+    const isCurrent =
       currentPosition &&
       startLatLng.lat() === currentPosition.latitude &&
       startLatLng.lng() === currentPosition.longitude;
 
-    if (!isCurrentLocation) {
+    if (!isCurrent) {
       new window.google.maps.Marker({
         position: startLatLng,
         map: mapInstance.current,
-        title: "Point de départ",
         icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
       });
     }
@@ -69,291 +70,287 @@ const RouteMap = () => {
     new window.google.maps.Marker({
       position: endLatLng,
       map: mapInstance.current,
-      title: "Point d'arrivée",
       icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
     });
   };
 
   const fetchQrCodeFromApi = async (id) => {
     try {
-      const check = await fetch(
-        `https://api.supmap-server.pp.ua/itineraries/itineraries/${id}`
-      );
-      if (!check.ok) throw new Error("Itinéraire non trouvé.");
-
       const qrRes = await fetch(
         `https://api.supmap-server.pp.ua/qrcode/qrcode/${id}`
       );
-      if (!qrRes.ok) throw new Error("Échec de génération du QR code.");
-
+      if (!qrRes.ok) throw new Error("Échec QR code");
       const blob = await qrRes.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      setQrImageBlobUrl(blobUrl);
+      const url = URL.createObjectURL(blob);
+      setQrImageBlobUrl(url);
       setShowPopup(true);
-    } catch (err) {
-      console.error("Erreur QR :", err);
-      alert(err.message);
+    } catch (e) {
+      alert(e.message);
     }
   };
 
   const searchItineraries = async () => {
-    if (!startAddress || !endAddress) {
-      alert("Veuillez entrer une adresse de départ et d'arrivée !");
-      return;
-    }
-
+    if (!startAddress || !endAddress) return alert("Remplir les champs !");
     const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Utilisateur non authentifié !");
-      return;
-    }
+    if (!token) return alert("Non connecté");
 
     const startLocation = currentPosition
       ? `${currentPosition.latitude},${currentPosition.longitude}`
-      : startAddress.trim(); // 🔐 Protection XSS : nettoyage des inputs
-
-    console.log("🔍 Données envoyées à l'API :", {
-      start_location: startLocation,
-      end_location: endAddress,
-      user_id: localStorage.getItem("user_id"),
-      avoidTolls: avoidTolls,
-    });
+      : startAddress.trim();
 
     try {
       setLoading(true);
-      const response = await fetch("/itineraries/itineraries/search", {
+      const res = await fetch("/itineraries/itineraries/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           start_location: startLocation,
-          end_location: endAddress.trim(), // 🔐 Protection XSS
+          end_location: endAddress.trim(),
           user_id: localStorage.getItem("user_id"),
-          avoidTolls: avoidTolls, // ✅ on envoie la valeur
+          avoidTolls,
         }),
       });
-
-      const text = await response.text();
-      const data = JSON.parse(text);
-
-      if (!response.ok) throw new Error(data?.error || "Erreur inconnue");
-      if (Array.isArray(data.itineraries)) {
-        setItineraries(data.itineraries);
-      } else {
-        alert("Aucun itinéraire proposé.");
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadItinerary = async (itinerary) => {
-    const startLocation = currentPosition
-      ? `${currentPosition.latitude},${currentPosition.longitude}`
-      : startAddress;
-
-    try {
-      setLoading(true);
-      const response = await fetch("/itineraries/itineraries/load", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: localStorage.getItem("user_id"),
-          start_location: startLocation,
-          end_location: endAddress,
-          selected_itinerary: {
-            duration: itinerary.duration,
-            distance: itinerary.distance,
-            toll_free: itinerary.toll_free,
-            route_points: itinerary.route_points
-              ?.filter((_, idx) => idx % 10 === 0)
-              .map(({ lat, lng }) => ({ lat, lng })),
-            steps: itinerary.steps, // ✅ AJOUTÉ pour permettre au backend de reconnaître l'itinéraire
-          },
-        }),
-      });
-
-      const text = await response.text();
-      if (!response.ok) throw new Error(text);
-
-      const data = JSON.parse(text);
-      if (!data?.itinerary) throw new Error("Itinéraire invalide.");
-
-      drawItinerary(
-        data.itinerary.route_points,
-        data.itinerary.duration,
-        data.itinerary.distance
-      );
-      setItineraryId(data.itinerary.id); // ID utilisé pour générer le QR code
-      setItineraries([]);
-    } catch (error) {
-      alert("Erreur lors du chargement de l'itinéraire.");
-      console.error(error);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur inconnue");
+      setItineraries(data.itineraries || []);
+    } catch (err) {
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const drawItinerary = (route_points, duration, distance) => {
-    if (!Array.isArray(route_points) || route_points.length === 0) {
-      alert("Itinéraire vide.");
-      return;
-    }
-
     if (routePolyline) routePolyline.setMap(null);
-
-    const routePoints = route_points.map(
-      (point) => new window.google.maps.LatLng(point.lat, point.lng)
+    const points = route_points.map(
+      (p) => new window.google.maps.LatLng(p.lat, p.lng)
     );
-
-    const polyline = new window.google.maps.Polyline({
-      path: routePoints,
-      geodesic: true,
-      strokeColor: "#007bff",
+    const poly = new window.google.maps.Polyline({
+      path: points,
+      strokeColor: "#a259ff",
       strokeOpacity: 0.8,
       strokeWeight: 5,
     });
-
-    polyline.setMap(mapInstance.current);
-    setRoutePolyline(polyline);
-
-    mapInstance.current.setCenter(routePoints[0]);
+    poly.setMap(mapInstance.current);
+    mapInstance.current.setCenter(points[0]);
     mapInstance.current.setZoom(16);
-
-    addMarkers(routePoints[0], routePoints[routePoints.length - 1]);
+    setRoutePolyline(poly);
+    addMarkers(points[0], points[points.length - 1]);
     setDuration(duration);
     setDistance(distance);
   };
-  // 🔐 Protection XSS : utilisation de encodeURIComponent pour éviter toute injection via l’URL
+
+  const loadItinerary = async (itinerary) => {
+    try {
+      setLoading(true);
+      const res = await fetch("/itineraries/itineraries/load", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: localStorage.getItem("user_id"),
+          start_location: startAddress,
+          end_location: endAddress,
+          selected_itinerary: {
+            duration: itinerary.duration,
+            distance: itinerary.distance,
+            toll_free: itinerary.toll_free,
+            steps: itinerary.steps,
+            route_points: itinerary.route_points
+              .filter((_, idx) => idx % 10 === 0)
+              .map(({ lat, lng }) => ({ lat, lng })),
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!data.itinerary) throw new Error("Aucun itinéraire");
+      drawItinerary(
+        data.itinerary.route_points,
+        data.itinerary.duration,
+        data.itinerary.distance
+      );
+      setItineraryId(data.itinerary.id);
+      setItineraries([]);
+    } catch (err) {
+      alert("Erreur lors du chargement de l'itinéraire.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert("La géolocalisation n'est pas supportée par votre navigateur.");
-      return;
-    }
-
+    if (!navigator.geolocation) return alert("Géolocalisation non disponible");
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         const { latitude, longitude } = coords;
-        const latLng = new window.google.maps.LatLng(latitude, longitude);
-
-        mapInstance.current.setCenter(latLng);
+        mapInstance.current.setCenter({ lat: latitude, lng: longitude });
         mapInstance.current.setZoom(16);
-
-        setStartAddress("Ma position actuelle");
         setCurrentPosition({ latitude, longitude });
+        setStartAddress("Ma position actuelle");
       },
-      (error) => {
-        alert("Impossible de récupérer votre position.");
-        console.error(error);
-      }
+      () => alert("Erreur localisation")
     );
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   return (
-    <div>
-      <div className="sidebar">
-        <button
-          className="menu-button"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+    <Box display="flex">
+      <Drawer open={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
+        <Box
+          p={3}
+          width={320}
+          sx={{
+            height: "100vh",
+            backgroundColor: "#f4f4f9", // Fond clair pour mieux distinguer le menu
+            borderLeft: "3px solid #a259ff", // Bordure à gauche pour mieux délimiter
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Ombre pour un effet de profondeur
+          }}
         >
-          ☰
-        </button>
+          {/* Ajouter une croix pour fermer le menu */}
+          <IconButton
+            onClick={() => setIsMenuOpen(false)}
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              color: "#a259ff",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
 
-        {isMenuOpen && (
-          <div className="menu">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Point de départ"
-                value={startAddress}
-                onChange={(e) => setStartAddress(e.target.value)}
+          <Typography variant="h6" mb={2} color="#a259ff">
+            🔍 Recherche d'itinéraire
+          </Typography>
+
+          <TextField
+            label="Point de départ"
+            fullWidth
+            value={startAddress}
+            onChange={(e) => setStartAddress(e.target.value)}
+            margin="normal"
+          />
+          <TextField
+            label="Point d'arrivé"
+            fullWidth
+            value={endAddress}
+            onChange={(e) => setEndAddress(e.target.value)}
+            margin="normal"
+          />
+          <Button fullWidth onClick={handleCurrentLocation}>
+            📍 Utiliser ma position
+          </Button>
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={avoidTolls}
+                onChange={() => setAvoidTolls(!avoidTolls)}
               />
-              <input
-                type="text"
-                placeholder="Point d'arrivée"
-                value={endAddress}
-                onChange={(e) => setEndAddress(e.target.value)}
-              />
-              <button onClick={handleCurrentLocation}>
-                📍 Ma position actuelle
-              </button>
-              <label className="checkbox-container">
-                Éviter les péages
-                <input
-                  type="checkbox"
-                  checked={avoidTolls}
-                  onChange={() => setAvoidTolls(!avoidTolls)}
-                />
-              </label>
-              <button onClick={searchItineraries} disabled={loading}>
-                {loading ? "Chargement..." : "Rechercher"}
-              </button>
+            }
+            label="Éviter les péages"
+          />
 
-              {itineraries.length > 0 && (
-                <div className="itinerary-list">
-                  {itineraries.map((itinerary, index) => (
-                    <div
-                      key={index}
-                      className="itinerary-item"
-                      onClick={() => loadItinerary(itinerary)}
-                    >
-                      <strong>Itinéraire {index + 1}</strong>
-                      <p>🕒 {Math.round(itinerary.duration / 60)} min</p>
-                      <p>📏 {(itinerary.distance / 1000).toFixed(2)} km</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={searchItineraries}
+            sx={{ my: 2, backgroundColor: "#a259ff" }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Rechercher"}
+          </Button>
 
-              {duration && distance && (
-                <div className="info-container">
-                  <p>🕒 Durée : {(duration / 60).toFixed(0)} minutes</p>
-                  <p>📏 Distance : {(distance / 1000).toFixed(2)} km</p>
-                </div>
-              )}
-
-              {itineraryId && (
-                <button onClick={() => fetchQrCodeFromApi(itineraryId)}>
-                  Partager l'itinéraire
-                </button>
-              )}
-            </div>
-
-            <button
-              className="logout-button1"
-              onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user_id");
-                window.location.href = "/";
+          {itineraries.map((itinerary, i) => (
+            <Box
+              key={i}
+              p={2}
+              my={1}
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: 2,
+                cursor: "pointer",
+                backgroundColor: "#f9f9f9",
               }}
+              onClick={() => loadItinerary(itinerary)}
             >
-              Déconnexion
-            </button>
-          </div>
-        )}
+              <Typography fontWeight="bold">Itinéraire {i + 1}</Typography>
+              <Typography>
+                🕒 {Math.round(itinerary.duration / 60)} min
+              </Typography>
+              <Typography>
+                📏 {(itinerary.distance / 1000).toFixed(2)} km
+              </Typography>
+            </Box>
+          ))}
+          {duration && distance && (
+            <Box mt={2}>
+              <Typography>
+                🕒 Durée : {(duration / 60).toFixed(0)} min
+              </Typography>
+              <Typography>
+                📏 Distance : {(distance / 1000).toFixed(2)} km
+              </Typography>
+            </Box>
+          )}
 
-        {showPopup && (
-          <div className="popup-overlay">
-            <div className="popup-content">
-              <button
-                className="close-button"
-                onClick={() => setShowPopup(false)}
-              >
-                X
-              </button>
-              <p>Scannez pour obtenir l'ID de l'itinéraire :</p>
-              {qrImageBlobUrl && (
-                <img src={qrImageBlobUrl} alt="QR Code Itinéraire" />
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-      <div ref={mapRef} className="map-container"></div>
-    </div>
+          {itineraryId && (
+            <Button
+              fullWidth
+              sx={{ mt: 2, color: "#a259ff" }}
+              onClick={() => fetchQrCodeFromApi(itineraryId)}
+            >
+              📎 Partager l'itinéraire
+            </Button>
+          )}
+
+          {/* Ajouter le bouton de déconnexion */}
+          <Button
+            fullWidth
+            sx={{ mt: 3, backgroundColor: "#a259ff", color: "#fff" }}
+            onClick={handleLogout}
+          >
+            Déconnexion
+          </Button>
+        </Box>
+      </Drawer>
+
+      {!isMenuOpen && (
+        <Box position="absolute" top={50} left={10} zIndex={1000}>
+          <IconButton
+            onClick={() => setIsMenuOpen(true)}
+            sx={{ backgroundColor: "#a259ff", borderRadius: "50%" }}
+          >
+            <MenuIcon fontSize="large" sx={{ color: "#fff" }} />
+          </IconButton>
+        </Box>
+      )}
+
+      <Box ref={mapRef} sx={{ height: "100vh", width: "100%" }} />
+
+      <Dialog open={showPopup} onClose={() => setShowPopup(false)}>
+        <DialogTitle>QR Code</DialogTitle>
+        <DialogContent>
+          <Box display="flex" justifyContent="center">
+            <img src={qrImageBlobUrl} alt="QR Code" width="200" height="200" />
+          </Box>
+
+          {/* Bouton "Fermer" en bas */}
+          <Button
+            fullWidth
+            sx={{ mt: 2, backgroundColor: "#a259ff", color: "#fff" }}
+            onClick={() => setShowPopup(false)} // Ferme le pop-up lorsqu'on clique sur "Fermer"
+          >
+            Fermer
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
 };
 
 export default RouteMap;
+

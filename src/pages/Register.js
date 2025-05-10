@@ -1,37 +1,47 @@
-import React, { useState } from "react";
+// src/pages/Register.js
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/Register.css";
+import {
+  Box,
+  Button,
+  CssBaseline,
+  Paper,
+  TextField,
+  Typography,
+  Link,
+  Fade,
+  IconButton,
+} from "@mui/material";
+import {
+  PersonAdd as PersonAddIcon,
+  DarkMode,
+  LightMode,
+} from "@mui/icons-material";
+import { createTheme, ThemeProvider} from "@mui/material/styles";
 
-// 🛡️ Étape 1 : Fonction pour neutraliser les balises potentiellement dangereuses (Protection XSS)
 const sanitizeInput = (input) => {
   const temp = document.createElement("div");
-  temp.textContent = input; // Échappe tout contenu HTML/JS
+  temp.textContent = input;
   return temp.innerHTML;
 };
 
 const Register = () => {
   const navigate = useNavigate();
-
-  // 📝 Étape 2 : Déclaration de l'état pour stocker les champs du formulaire
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-
   });
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
 
-  // 🛡️ Étape 3 : Nettoyer chaque saisie utilisateur avant de la stocker (Protection XSS)
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const sanitizedValue = sanitizeInput(value); // <-- protection ici
-    setFormData({ ...formData, [name]: sanitizedValue });
+    setFormData({ ...formData, [name]: sanitizeInput(value) });
   };
 
-  // 🚀 Étape 4 : Envoi des données vers l'API après soumission du formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -43,82 +53,160 @@ const Register = () => {
         "https://api.supmap-server.pp.ua/users/users",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData), // Les données ont déjà été nettoyées
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
         }
       );
 
       const data = await response.json();
-
-      // ✅ Étape 5 : Vérification de la réponse de l'API
       if (!response.ok)
         throw new Error(data.error || "Une erreur est survenue.");
 
       setMessage("Inscription réussie ! 🎉 Redirection...");
       setTimeout(() => navigate("/"), 2000);
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🎨 Étape 6 : Affichage du formulaire sécurisé côté utilisateur
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: darkMode ? "dark" : "light",
+          primary: { main: "#a259ff" },
+          background: {
+            default: darkMode ? "#121212" : "#f5f5fa",
+            paper: darkMode ? "#1e1e1e" : "#ffffff",
+          },
+        },
+        typography: {
+          fontFamily: "'Inter', sans-serif",
+        },
+      }),
+    [darkMode]
+  );
+
   return (
-    <div className="register-page">
-      <h1 className="register-title">SupMap</h1>
-      <div className="register-container">
-        <h2>Inscription</h2>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "background.default",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          px: 2,
+          position: "relative",
+        }}
+      >
+        {/* 🌙/☀️ Thème Toggle en haut à droite */}
+        <IconButton
+          onClick={() => setDarkMode(!darkMode)}
+          sx={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            color: "text.primary",
+          }}
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? <LightMode /> : <DarkMode />}
+        </IconButton>
 
-        {message && <p className="success-message">{message}</p>}
-        {error && <p className="error-message">{error}</p>}
+        <Fade in timeout={600}>
+          <Paper
+            elevation={4}
+            sx={{
+              p: 5,
+              borderRadius: 4,
+              maxWidth: 420,
+              width: "100%",
+              textAlign: "center",
+              backgroundColor: "background.paper",
+              color: "text.primary",
+            }}
+          >
+            <PersonAddIcon
+              sx={{ fontSize: 32, color: "primary.main", mb: 1 }}
+            />
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Créer un compte
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Rejoignez SupMap et explorez intelligemment.
+            </Typography>
 
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="name">Nom complet</label>
-          <input
-            className="input-register"
-            type="text"
-            name="username"
-            placeholder="Votre nom complet"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
+            {message && (
+              <Typography color="success.main" sx={{ mb: 2 }}>
+                {message}
+              </Typography>
+            )}
+            {error && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
 
-          <label htmlFor="email">Adresse email</label>
-          <input
-            className="input-register"
-            type="email"
-            name="email"
-            placeholder="Adresse email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <TextField
+                label="Nom complet"
+                name="username"
+                fullWidth
+                margin="normal"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                label="Adresse email"
+                name="email"
+                type="email"
+                fullWidth
+                margin="normal"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+              <TextField
+                label="Mot de passe"
+                name="password"
+                type="password"
+                fullWidth
+                margin="normal"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
 
-          <label htmlFor="password">Mot de passe</label>
-          <input
-            className="input-register"
-            type="password"
-            name="password"
-            placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  mt: 3,
+                  py: 1.5,
+                  fontWeight: "bold",
+                  borderRadius: 2,
+                }}
+              >
+                {loading ? "Inscription en cours..." : "S'inscrire"}
+              </Button>
+            </Box>
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Inscription en cours..." : "S'inscrire"}
-          </button>
-
-          <div className="register-links">
-            <a href="/">Se connecter</a>
-          </div>
-        </form>
-      </div>
-    </div>
+            <Box sx={{ mt: 2 }}>
+              <Link href="/" underline="hover" fontSize={14}>
+                Déjà un compte ? Se connecter
+              </Link>
+            </Box>
+          </Paper>
+        </Fade>
+      </Box>
+    </ThemeProvider>
   );
 };
 

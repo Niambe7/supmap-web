@@ -1,14 +1,17 @@
 import React from "react";
-import ReactDOM from "react-dom/client"; // ✅ Import correct
+import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
+import CustomThemeProvider from "./components/ThemeProvider"; // ✅ Import du ThemeProvider
 
-const root = ReactDOM.createRoot(document.getElementById("root")); // ✅ createRoot() au lieu de render()
+const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
-    <Router>
-      <App />
-    </Router>
+    <CustomThemeProvider>
+      <Router>
+        <App />
+      </Router>
+    </CustomThemeProvider>
   </React.StrictMode>
 );

@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
+  Box,
+  Button,
+  Container,
+  Tab,
+  Tabs,
+  Typography,
+  AppBar,
+} from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import {
   CongestionPeriods,
   IncidentsPerDay,
   PendingIncidents,
   ActiveIncidents,
   ResolvedIncidents,
 } from "../components/AdminTabs";
-
-import { motion, AnimatePresence } from "framer-motion";
-import "../styles/AdminDashboard.css";
 
 const tabs = [
   { label: "Congestion", key: "congestion" },
@@ -196,23 +203,32 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="admin-header">
-      <h1>Tableau de Bord Administrateur</h1>
-      <button className="logout-button" onClick={handleLogout}>
-        Déconnexion
-      </button>
+    <Container>
+      <Box sx={{ display: "flex", justifyContent: "space-between", py: 3 }}>
+        <Typography variant="h4">Tableau de Bord Administrateur</Typography>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleLogout}
+          sx={{ height: 40 }}
+        >
+          Déconnexion
+        </Button>
+      </Box>
 
-      <div className="tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setCurrentTab(tab.key)}
-            className={`tab-button ${currentTab === tab.key ? "active" : ""}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <AppBar position="static">
+        <Tabs
+          value={currentTab}
+          onChange={(event, newTab) => setCurrentTab(newTab)}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="tabs admin"
+        >
+          {tabs.map((tab) => (
+            <Tab key={tab.key} label={tab.label} value={tab.key} />
+          ))}
+        </Tabs>
+      </AppBar>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -225,7 +241,7 @@ function AdminDashboard() {
           {renderTabContent()}
         </motion.div>
       </AnimatePresence>
-    </div>
+    </Container>
   );
 }
 

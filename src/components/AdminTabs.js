@@ -10,6 +10,21 @@ import {
   Cell,
 } from "recharts";
 import { loadGoogleMaps } from "../utils/loadGoogleMaps";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tab,
+} from "@mui/material";
 
 const getCongestionLevel = (count) => {
   if (count >= 10) return "very_high";
@@ -47,25 +62,23 @@ export function CongestionPeriods({
   const mapInstance = useRef(null);
   const [isGoogleMapsReady, setIsGoogleMapsReady] = useState(false); // Ajout de l'état pour l'API
 
-  console.log("Clé API:", process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
-
   useEffect(() => {
     const initMap = async () => {
       try {
-        const google = await loadGoogleMaps(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+        const google = await loadGoogleMaps(
+          process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+        );
 
         if (!window.google || !google.maps || !google.maps.visualization) {
-          console.error("L'API Google Maps n'a pas pu être chargée correctement.");
+          console.error(
+            "L'API Google Maps n'a pas pu être chargée correctement."
+          );
           alert("L'API Google Maps n'a pas pu être chargée correctement.");
           return;
         }
 
-        console.log("Google Maps chargé avec succès:", google);
-
-        // Une fois que l'API Google Maps est chargée, on met à jour l'état pour signaler que la carte peut être affichée
         setIsGoogleMapsReady(true);
 
-        // Initialiser la carte avec un délai pour s'assurer que l'API est complètement prête
         if (location && google && mapRef.current) {
           if (!mapInstance.current) {
             mapInstance.current = new google.maps.Map(mapRef.current, {
@@ -97,7 +110,10 @@ export function CongestionPeriods({
               .filter((item) => item.lat && item.lng)
               .map(
                 (item) =>
-                  new google.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng))
+                  new google.maps.LatLng(
+                    parseFloat(item.lat),
+                    parseFloat(item.lng)
+                  )
               );
 
             new google.maps.visualization.HeatmapLayer({
@@ -131,37 +147,53 @@ export function CongestionPeriods({
   });
 
   if (!isGoogleMapsReady) {
-    return <div>Chargement de la carte...</div>;
+    return <Typography variant="h6">Chargement de la carte...</Typography>;
   }
 
   return (
-    <section className="section">
-      <h2>Périodes de Congestion</h2>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Périodes de Congestion
+      </Typography>
 
-      <div className="congestion-form">
-        <input
-          type="text"
-          placeholder="Zone (ex: Gare du Nord, Paris)"
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          marginBottom: 2,
+        }}
+      >
+        <TextField
+          label="Zone (ex: Gare du Nord, Paris)"
+          variant="outlined"
           value={searchZone}
           onChange={(e) => setSearchZone(e.target.value)}
         />
-        <input
+        <TextField
+          label="Rayon en mètres"
+          variant="outlined"
           type="number"
-          placeholder="Rayon en mètres"
           value={radius}
           onChange={(e) => setRadius(e.target.value)}
         />
-        <button onClick={handleSearch}>Rechercher</button>
-      </div>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#a259ff" }}
+          onClick={handleSearch}
+        >
+          Rechercher
+        </Button>
+      </Box>
 
       {location && (
-        <div style={{ height: "300px", marginTop: "2rem" }}>
+        <Box sx={{ height: 300, marginTop: 2 }}>
           <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
-        </div>
+        </Box>
       )}
 
-      <div style={{ marginTop: "2rem", width: "100%", height: 400 }}>
-        <ResponsiveContainer>
+      <Box sx={{ marginTop: 2 }}>
+        <ResponsiveContainer width="100%" height={400}>
           <BarChart
             data={chartData}
             margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
@@ -192,159 +224,263 @@ export function CongestionPeriods({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
-    </section>
+      </Box>
+    </Box>
   );
 }
 
-
 export function IncidentsPerDay({ incidentsPerDay }) {
   return (
-    <section className="section">
-      <h2>Incidents Signalés Par Jour</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Nombre d'incidents</th>
-          </tr>
-        </thead>
-        <tbody>
-          {incidentsPerDay.length > 0 ? (
-            incidentsPerDay.map((day, index) => {
-              const date = new Date(day.report_date).toLocaleDateString(
-                "fr-FR"
-              );
-              return (
-                <tr key={index}>
-                  <td>{date}</td>
-                  <td>{day.incident_count}</td>
-                </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan="2">Aucun incident trouvé.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Incidents Signalés Par Jour
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Date</TableCell>
+              <TableCell>Nombre d'incidents</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {incidentsPerDay.length > 0 ? (
+              incidentsPerDay.map((day, index) => {
+                const date = new Date(day.report_date).toLocaleDateString(
+                  "fr-FR"
+                );
+                return (
+                  <TableRow key={index}>
+                    <TableCell>{date}</TableCell>
+                    <TableCell>{day.incident_count}</TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan="2">Aucun incident trouvé.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }
 
 export function PendingIncidents({ pendingIncidents, updateIncidentStatus }) {
   return (
-    <section className="section">
-      <h2>Incidents à Approuver</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Statut</th>
-            <th>Contributions</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pendingIncidents.length > 0 ? (
-            pendingIncidents.map((incident) => (
-              <tr key={incident.id}>
-                <td>{incident.id}</td>
-                <td>{incident.type}</td>
-                <td>{incident.status}</td>
-                <td>{incident.yesVotes}</td>
-                <td>
-                  <button
-                    className="btn-approve"
-                    onClick={() => updateIncidentStatus(incident.id, "approve")}
-                  >
-                    Approuver
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5">Aucun incident en attente.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Incidents à Approuver
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Statut</TableCell>
+              <TableCell>Contributions</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {pendingIncidents.length > 0 ? (
+              pendingIncidents.map((incident) => (
+                <TableRow key={incident.id}>
+                  <TableCell>{incident.id}</TableCell>
+                  <TableCell>{incident.type}</TableCell>
+                  <TableCell>{incident.status}</TableCell>
+                  <TableCell>{incident.yesVotes}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#a259ff" }}
+                      color="primary"
+                      onClick={() =>
+                        updateIncidentStatus(incident.id, "approve")
+                      }
+                    >
+                      Approuver
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="5">Aucun incident en attente.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }
 
 export function ActiveIncidents({ activeIncidents, updateIncidentStatus }) {
   return (
-    <section className="section">
-      <h2>Incidents à Résoudre</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Statut</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {activeIncidents.length > 0 ? (
-            activeIncidents.map((incident) => (
-              <tr key={incident.id}>
-                <td>{incident.id}</td>
-                <td>{incident.type}</td>
-                <td>{incident.status}</td>
-                <td>
-                  <button
-                    className="btn-resolve"
-                    onClick={() => updateIncidentStatus(incident.id, "resolve")}
-                  >
-                    Résolu
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5">Aucun incident actif.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Incidents à Résoudre
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Statut</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {activeIncidents.length > 0 ? (
+              activeIncidents.map((incident) => (
+                <TableRow key={incident.id}>
+                  <TableCell>{incident.id}</TableCell>
+                  <TableCell>{incident.type}</TableCell>
+                  <TableCell>{incident.status}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#a259ff" }}
+                      color="secondary"
+                      onClick={() =>
+                        updateIncidentStatus(incident.id, "resolve")
+                      }
+                    >
+                      Résolu
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="4">Aucun incident actif.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }
 
 export function ResolvedIncidents({ resolvedIncidents }) {
   return (
-    <section className="section">
-      <h2>Historique des Incidents Résolus</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          {resolvedIncidents.length > 0 ? (
-            resolvedIncidents.map((incident) => (
-              <tr key={incident.id}>
-                <td>{incident.id}</td>
-                <td>{incident.type}</td>
-                <td>{incident.status}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4">Aucun incident résolu.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </section>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Historique des Incidents Résolus
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Statut</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {resolvedIncidents.length > 0 ? (
+              resolvedIncidents.map((incident) => (
+                <TableRow key={incident.id}>
+                  <TableCell>{incident.id}</TableCell>
+                  <TableCell>{incident.type}</TableCell>
+                  <TableCell>{incident.status}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="3">Aucun incident résolu.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  );
+}
+
+export function Dashboard() {
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+  };
+
+  const renderTabContent = () => {
+    switch (selectedTab) {
+      case 0:
+        return <CongestionPeriods />;
+      case 1:
+        return <IncidentsPerDay />;
+      case 2:
+        return <ActiveIncidents />;
+      case 3:
+        return <ResolvedIncidents />;
+      default:
+        return (
+          <Typography variant="h6">Veuillez sélectionner un onglet</Typography>
+        );
+    }
+  };
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* AppBar avec la couleur #a259ff */}
+      
+
+      <Box sx={{ display: "flex", flexDirection: "row", height: "100%" }}>
+        {/* Sidebar avec les onglets */}
+        <Box
+          sx={{
+            width: 240,
+            backgroundColor: "#a259ff",
+            padding: 2,
+            borderRight: "1px solid #ddd", // Légère bordure pour un effet plus propre
+          }}
+        >
+          <Tabs
+            orientation="vertical"
+            value={selectedTab}
+            onChange={handleTabChange}
+            aria-label="Menu de navigation"
+            sx={{
+              "& .MuiTab-root": {
+                color: "#fff",
+                backgroundColor: "#a259ff",
+                marginBottom: 1,
+                borderRadius: 1,
+                textTransform: "none",
+              },
+              "& .Mui-selected": {
+                fontWeight: "bold",
+                backgroundColor: "#8338ec", // un peu plus foncé si tu veux différencier
+              },
+              "& .MuiTab-textColorPrimary": {
+                color: "#333", // Couleur de texte des onglets non sélectionnés
+              },
+            }}
+          >
+            <Tab label="Périodes de Congestion" />
+            <Tab label="Incidents Par Jour" />
+            <Tab label="Incidents Actifs" />
+            <Tab label="Incidents Résolus" />
+          </Tabs>
+        </Box>
+
+        {/* Contenu principal */}
+        <Box sx={{ flex: 1, padding: 2, backgroundColor: "#fff" }}>
+          {renderTabContent()}
+        </Box>
+      </Box>
+    </Box>
   );
 }
