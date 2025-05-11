@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -62,8 +61,8 @@ const Login = () => {
       const { token, user } = data;
       localStorage.setItem("token", token);
       localStorage.setItem("user_id", user.id);
-      localStorage.setItem("username", user.username); // Stockage du nom d'utilisateur
-      localStorage.setItem("email", user.email); // Stockage de l'email
+      localStorage.setItem("username", user.username); 
+      localStorage.setItem("email", user.email); 
       localStorage.setItem("role", user.role);
       navigate(user.role === "admin" ? "/trafficAnalysis" : "/map");
     } catch {

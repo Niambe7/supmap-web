@@ -1,4 +1,3 @@
-// src/pages/ForgotPassword.js
 import React, { useState, useMemo } from "react";
 import {
   Box,
@@ -49,7 +48,6 @@ const ForgotPassword = () => {
       return;
     }
 
-    // Simule l’envoi (remplacer plus tard par une vraie API)
     setTimeout(() => {
       setSent(true);
     }, 1000);
@@ -69,7 +67,7 @@ const ForgotPassword = () => {
           position: "relative",
         }}
       >
-        {/* Bouton thème clair/sombre */}
+      
         <IconButton
           onClick={() => setDarkMode(!darkMode)}
           sx={{

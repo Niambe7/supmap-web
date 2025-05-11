@@ -1,4 +1,3 @@
-// App.js
 import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
@@ -8,7 +7,7 @@ import TrafficAnalysis from "./pages/AdminDashboard";
 import AdminRoute from "./components/AdminRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 
-// 👉 Import de la fonction utilitaire
+// Import de la fonction utilitaire
 import { loadGoogleMaps } from "./utils/loadGoogleMaps";
 
 function App() {

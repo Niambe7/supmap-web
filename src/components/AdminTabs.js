@@ -104,7 +104,7 @@ export function CongestionPeriods({
             strokeWeight: 1,
           });
 
-          // Ajouter la Heatmap si les données existent
+          // Ajout de la Heatmap si les données existent
           if (google.maps.visualization && congestionData.length > 0) {
             const heatmapData = congestionData
               .filter((item) => item.lat && item.lng)
@@ -434,17 +434,13 @@ export function Dashboard() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* AppBar avec la couleur #a259ff */}
-      
-
       <Box sx={{ display: "flex", flexDirection: "row", height: "100%" }}>
-        {/* Sidebar avec les onglets */}
         <Box
           sx={{
             width: 240,
             backgroundColor: "#a259ff",
             padding: 2,
-            borderRight: "1px solid #ddd", // Légère bordure pour un effet plus propre
+            borderRight: "1px solid #ddd", 
           }}
         >
           <Tabs
@@ -462,10 +458,10 @@ export function Dashboard() {
               },
               "& .Mui-selected": {
                 fontWeight: "bold",
-                backgroundColor: "#8338ec", // un peu plus foncé si tu veux différencier
+                backgroundColor: "#8338ec", 
               },
               "& .MuiTab-textColorPrimary": {
-                color: "#333", // Couleur de texte des onglets non sélectionnés
+                color: "#333", 
               },
             }}
           >
@@ -476,7 +472,6 @@ export function Dashboard() {
           </Tabs>
         </Box>
 
-        {/* Contenu principal */}
         <Box sx={{ flex: 1, padding: 2, backgroundColor: "#fff" }}>
           {renderTabContent()}
         </Box>

@@ -1,4 +1,3 @@
-// src/pages/Register.js
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -103,7 +102,7 @@ const Register = () => {
           position: "relative",
         }}
       >
-        {/* 🌙/☀️ Thème Toggle en haut à droite */}
+       
         <IconButton
           onClick={() => setDarkMode(!darkMode)}
           sx={{

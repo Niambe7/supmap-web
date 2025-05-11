@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close"; // Import de la croix
+import CloseIcon from "@mui/icons-material/Close";
 import { loadGoogleMaps } from "../utils/loadGoogleMaps";
 
 const RouteMap = () => {
@@ -204,12 +204,12 @@ const RouteMap = () => {
           width={320}
           sx={{
             height: "100vh",
-            backgroundColor: "#f4f4f9", // Fond clair pour mieux distinguer le menu
-            borderLeft: "3px solid #a259ff", // Bordure à gauche pour mieux délimiter
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Ombre pour un effet de profondeur
+            backgroundColor: "#f4f4f9", 
+            borderLeft: "3px solid #a259ff", 
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", 
           }}
         >
-          {/* Ajouter une croix pour fermer le menu */}
+          
           <IconButton
             onClick={() => setIsMenuOpen(false)}
             sx={{
@@ -307,7 +307,6 @@ const RouteMap = () => {
             </Button>
           )}
 
-          {/* Ajouter le bouton de déconnexion */}
           <Button
             fullWidth
             sx={{ mt: 3, backgroundColor: "#a259ff", color: "#fff" }}
@@ -338,11 +337,10 @@ const RouteMap = () => {
             <img src={qrImageBlobUrl} alt="QR Code" width="200" height="200" />
           </Box>
 
-          {/* Bouton "Fermer" en bas */}
           <Button
             fullWidth
             sx={{ mt: 2, backgroundColor: "#a259ff", color: "#fff" }}
-            onClick={() => setShowPopup(false)} // Ferme le pop-up lorsqu'on clique sur "Fermer"
+            onClick={() => setShowPopup(false)} 
           >
             Fermer
           </Button>

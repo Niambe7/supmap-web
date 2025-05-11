@@ -4,7 +4,7 @@ let loadPromise = null;
 
 export function loadGoogleMaps(apiKey) {
   if (typeof window.google !== "undefined") {
-    // Si Google est déjà chargé, retourner la promesse résolue
+    // Si Google est déjà chargé, on retourne la promesse résolue
     return Promise.resolve(window.google);
   }
 
