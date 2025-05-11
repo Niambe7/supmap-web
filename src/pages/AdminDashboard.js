@@ -3,10 +3,7 @@ import {
   Box,
   Button,
   Container,
-  Tab,
-  Tabs,
-  Typography,
-  AppBar,
+  Typography
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -216,19 +213,40 @@ function AdminDashboard() {
         </Button>
       </Box>
 
-      <AppBar position="static">
-        <Tabs
-          value={currentTab}
-          onChange={(event, newTab) => setCurrentTab(newTab)}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="tabs admin"
-        >
-          {tabs.map((tab) => (
-            <Tab key={tab.key} label={tab.label} value={tab.key} />
-          ))}
-        </Tabs>
-      </AppBar>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          bgcolor: "#a259ff",
+          px: 2,
+          py: 1,
+          borderRadius: 2,
+          mb: 2,
+          color: "white",
+        }}
+      >
+        {tabs.map((tab) => (
+          <Button
+            key={tab.key}
+            onClick={() => setCurrentTab(tab.key)}
+            variant={currentTab === tab.key ? "contained" : "text"}
+            sx={{
+              backgroundColor: currentTab === tab.key ? "white" : "transparent",
+              color: currentTab === tab.key ? "#a259ff" : "white",
+              "&:hover": {
+                backgroundColor:
+                  currentTab === tab.key ? "#f3e8ff" : "rgba(255,255,255,0.2)",
+              },
+              borderRadius: 2,
+              fontWeight: "bold",
+              textTransform: "none",
+            }}
+          >
+            {tab.label}
+          </Button>
+        ))}
+      </Box>
 
       <AnimatePresence mode="wait">
         <motion.div

@@ -22,7 +22,7 @@ const RouteMap = () => {
   const mapInstance = useRef(null);
 
   const [startAddress, setStartAddress] = useState("");
-  const [endAddress, setEndAddress] = useState("");
+  const [endAddress, setEndAddress] = useState("60 rue camille Desmoulins, 94800 Villejuif");
   const [routePolyline, setRoutePolyline] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [avoidTolls, setAvoidTolls] = useState(false);
